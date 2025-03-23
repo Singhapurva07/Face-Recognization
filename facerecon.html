@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FaceRecon - AI-powered facial reconstruction and enhancement tool">
+  <title>FaceRecon - AI Facial Reconstruction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4db6ff;
+      --primary-dark: #3a9fe6;
+      --primary-light: #7ac9ff;
+      --primary-transparent: rgba(77, 182, 255, 0.1);
+      --primary-gradient: linear-gradient(135deg, #4db6ff, #0078d4);
+      --primary-glow: rgba(77, 182, 255, 0.5);
+      --background: #f5f9fc;
+      --foreground: #1a202c;
+      --card: #ffffff;
+      --card-foreground: #1a202c;
+      --border: #e2e8f0;
+      --input: #e2e8f0;
+      --ring: #4db6ff;
+      --radius: 0.5rem;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --bubble-color-1: rgba(77, 182, 255, 0.3);
+      --bubble-color-2: rgba(58, 159, 230, 0.25);
+      --bubble-color-3: rgba(0, 120, 212, 0.2);
+      --danger: #e53e3e;
+      --success: #38a169;
+      --warning: #f6ad55;
+      --info: #63b3ed;
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.5s ease;
+    }
+
+    .dark-mode {
+      --primary: #4db6ff;
+      --primary-dark: #3a9fe6;
+      --primary-light: #7ac9ff;
+      --primary-transparent: rgba(77, 182, 255, 0.2);
+      --primary-gradient: linear-gradient(135deg, #4db6ff, #0078d4);
+      --primary-glow: rgba(77, 182, 255, 0.5);
+      --background: #0f172a;
+      --foreground: #f8fafc;
+      --card: #1e293b;
+      --card-foreground: #f8fafc;
+      --border: #334155;
+      --input: #334155;
+      --ring: #4db6ff;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+      --bubble-color-1: rgba(77, 182, 255, 0.25);
+      --bubble-color-2: rgba(58, 159, 230, 0.2);
+      --bubble-color-3: rgba(0, 120, 212, 0.15);
+      --danger: #f56565;
+      --success: #48bb78;
+      --warning: #f6ad55;
+      --info: #63b3ed;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      min-height: 100vh;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Focus styles for accessibility */
+    :focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Animated Background */
+    .animated-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.9;
+      filter: blur(15px);
+      animation: float 20s infinite ease-in-out;
+      will-change: transform;
+    }
+
+    .bubble-1 {
+      width: 350px;
+      height: 350px;
+      background-color: var(--bubble-color-1);
+      top: 10%;
+      left: 10%;
+      animation-duration: 25s;
+    }
+
+    .bubble-2 {
+      width: 250px;
+      height: 250px;
+      background-color: var(--bubble-color-2);
+      top: 60%;
+      left: 20%;
+      animation-duration: 30s;
+      animation-delay: 2s;
+    }
+
+    .bubble-3 {
+      width: 300px;
+      height: 300px;
+      background-color: var(--bubble-color-3);
+      top: 30%;
+      right: 15%;
+      animation-duration: 28s;
+      animation-delay: 1s;
+    }
+
+    .bubble-4 {
+      width: 220px;
+      height: 220px;
+      background-color: var(--bubble-color-1);
+      bottom: 20%;
+      right: 25%;
+      animation-duration: 22s;
+      animation-delay: 3s;
+    }
+
+    .bubble-5 {
+      width: 270px;
+      height: 270px;
+      background-color: var(--bubble-color-2);
+      bottom: 10%;
+      right: 10%;
+      animation-duration: 26s;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(5%, 10%) rotate(5deg);
+      }
+      50% {
+        transform: translate(10%, -5%) rotate(10deg);
+      }
+      75% {
+        transform: translate(-5%, 5%) rotate(5deg);
+      }
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+    }
+
+    /* Particles Animation */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background-color: var(--primary);
+      opacity: 0.5;
+      animation: particleFloat 15s infinite linear;
+      will-change: transform, opacity;
+    }
+
+    .particle:nth-child(3n) {
+      background-color: var(--primary-dark);
+    }
+
+    .particle:nth-child(3n+1) {
+      background-color: var(--primary-light);
+    }
+
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.5;
+      }
+      90% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(-100vh) translateX(100px);
+        opacity: 0;
+      }
+    }
+
+    /* Page Container */
+    .page-container {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      animation: fadeIn var(--transition-slow) ease-in-out;
+      position: relative;
+    }
+
+    .page-container.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Auth Pages (Signup & Login) */
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .auth-info {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-form {
+      flex: 1;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background-color: var(--card);
+      box-shadow: var(--shadow);
+      position: relative;
+      z-index: 1;
+      transition: box-shadow var(--transition-normal), background-color var(--transition-normal);
+    }
+
+    .auth-form:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--foreground);
+      margin-bottom: 1rem;
+      transition: transform var(--transition-normal);
+    }
+
+    .auth-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .auth-logo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--primary);
+      filter: drop-shadow(0 0 5px var(--primary-transparent));
+    }
+
+    .auth-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s infinite linear;
+      background-size: 200% 100%;
+      text-shadow: 0 0 10px var(--primary-transparent);
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 200% 50%;
+      }
+    }
+
+    .auth-description {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+      max-width: 500px;
+      animation: fadeSlideUp 1s ease-out;
+    }
+
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .auth-features {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .auth-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeSlideIn 0.5s ease-out forwards;
+    }
+
+    .auth-features li:nth-child(1) { animation-delay: 0.1s; }
+    .auth-features li:nth-child(2) { animation-delay: 0.2s; }
+    .auth-features li:nth-child(3) { animation-delay: 0.3s; }
+    .auth-features li:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .auth-features li svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .auth-form-container {
+      max-width: 400px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .auth-form-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .auth-form-title::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: var(--primary-gradient);
+      border-radius: 3px;
+      transition: width var(--transition-normal);
+    }
+
+    .auth-form-title:hover::after {
+      width: 100px;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--input);
+      background-color: var(--card);
+      color: var(--card-foreground);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-transparent);
+      transform: translateY(-1px);
+    }
+
+    .form-group.checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group.checkbox label {
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+
+    .form-group.checkbox input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .form-error {
+      color: var(--danger);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-3px); }
+      40%, 60% { transform: translateX(3px); }
+    }
+
+    .form-error.active {
+      display: block;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.875rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .form-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--transition-fast);
+      position: relative;
+    }
+
+    .form-footer a:hover {
+      color: var(--primary-dark);
+    }
+
+    .form-footer a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--primary);
+      transition: width var(--transition-normal);
+    }
+
+    .form-footer a:hover::after {
+      width: 100%;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .forgot-password a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+      position: relative;
+    }
+
+    .forgot-password a:hover {
+      color: var(--primary-dark);
+    }
+
+    .forgot-password a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 1px;
+      bottom: -2px;
+      left: 0;
+      background-color: var(--primary);
+      transition: width var(--transition-normal);
+    }
+
+    .forgot-password a:hover::after {
+      width: 100%;
+    }
+
+    /* Password Requirements */
+    .password-requirements {
+      margin-top: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--foreground);
+      opacity: 0.7;
+      background-color: var(--background);
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      transition: opacity var(--transition-fast);
+    }
+
+    .password-requirements:hover {
+      opacity: 1;
+    }
+
+    .password-requirements ul {
+      list-style: none;
+      margin-top: 0.25rem;
+      padding-left: 0.5rem;
+    }
+
+    .password-requirements li {
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: color var(--transition-fast);
+    }
+
+    .password-requirements li::before {
+      content: "•";
+      display: inline-block;
+      margin-right: 0.25rem;
+    }
+
+    .password-requirements li.valid {
+      color: var(--success);
+    }
+
+    .password-requirements li.valid::before {
+      content: "✓";
+    }
+
+    .password-requirements li.invalid {
+      color: var(--danger);
+    }
+
+    .password-requirements li.invalid::before {
+      content: "✗";
+    }
+
+    /* Buttons */
+    .button {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background-color: var(--card);
+      color: var(--card-foreground);
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      text-align: center;
+    }
+
+    .button:hover {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .button.primary {
+      background: var(--primary-gradient);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .button.primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      box-shadow: 0 4px 10px var(--primary-transparent);
+    }
+
+    .button.danger {
+      background-color: var(--danger);
+      color: white;
+      border-color: var(--danger);
+    }
+
+    .button.danger:hover {
+      opacity: 0.9;
+    }
+
+    .icon-button {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background-color: var(--card);
+      color: var(--card-foreground);
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .icon-button.absolute {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+
+    .icon-button:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      color: var(--primary);
+    }
+
+    .icon-button:active {
+      transform: translateY(0);
+    }
+
+    .icon-button svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      transition: transform var(--transition-fast);
+    }
+
+    .icon-button:hover svg {
+      transform: scale(1.1);
+    }
+
+    /* Ripple Effect */
+    .ripple-button {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background-color: rgba(77, 182, 255, 0.4);
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    /* Theme Toggle */
+    .theme-toggle .sun-icon {
+      display: block;
+    }
+
+    .theme-toggle .moon-icon {
+      display: none;
+    }
+
+    .dark-mode .theme-toggle .sun-icon {
+      display: none;
+    }
+
+    .dark-mode .theme-toggle .moon-icon {
+      display: block;
+    }
+
+    /* Dashboard */
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--foreground);
+      transition: transform var(--transition-normal);
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .logo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: var(--primary);
+      filter: drop-shadow(0 0 5px var(--primary-transparent));
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Dashboard Content */
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 0;
+      position: relative;
+    }
+
+    .logo-animation {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 3rem;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .brain-icon {
+      width: 7rem;
+      height: 7rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      animation: pulse 3s infinite ease-in-out;
+      filter: drop-shadow(0 0 15px var(--primary-transparent));
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px var(--primary-transparent));
+      }
+      50% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 25px var(--primary-glow));
+      }
+      100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px var(--primary-transparent));
+      }
+    }
+
+    .app-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s infinite linear;
+      background-size: 200% 100%;
+      text-shadow: 0 0 20px var(--primary-transparent);
+    }
+
+    .app-description {
+      color: var(--foreground);
+      opacity: 0.8;
+      margin-bottom: 2rem;
+      text-align: center;
+      max-width: 600px;
+    }
+
+    .preview-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      animation: fadeSlideUp 0.8s ease-out;
+    }
+
+    /* Upload Area Styles */
+    .upload-area {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    #drop-area {
+      flex: 1;
+      border: 2px dashed var(--primary);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-align: center;
+      background-color: var(--primary-transparent);
+      transition: all var(--transition-normal);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    #drop-area:hover {
+      background-color: var(--primary-transparent);
+      border-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    #drop-area.highlight {
+      background-color: var(--primary-transparent);
+      border-color: var(--primary-dark);
+      transform: scale(1.02);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Fixed size preview container */
+    .preview-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    #preview {
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background-color: var(--card);
+      box-shadow: var(--shadow);
+      transition: all var(--transition-normal);
+      position: relative;
+    }
+
+    #preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: var(--radius);
+      transition: transform var(--transition-normal);
+    }
+
+    #preview:hover img {
+      transform: scale(1.05);
+    }
+
+    /* Preview delete button */
+    #preview-delete-button {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 2rem;
+      height: 2rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity var(--transition-fast), transform var(--transition-fast), background-color var(--transition-fast);
+      z-index: 2;
+    }
+
+    #preview:hover #preview-delete-button {
+      opacity: 1;
+    }
+
+    #preview-delete-button:hover {
+      background-color: var(--danger);
+      transform: scale(1.1);
+    }
+
+    #preview-delete-button svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .upload-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .upload-actions .icon-button {
+      width: 3rem;
+      height: 3rem;
+      transition: all var(--transition-normal);
+      background: var(--card);
+      color: var(--primary);
+      border: 1px solid var(--primary-light);
+    }
+
+    .upload-actions .icon-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px var(--primary-transparent);
+      background: var(--primary-gradient);
+      color: white;
+    }
+
+    .upload-actions .icon-button svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .image-item {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      aspect-ratio: 1;
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .image-item:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: var(--shadow-lg);
+      z-index: 1;
+    }
+
+    .image-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-normal);
+    }
+
+    .image-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .image-item .delete-button {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 2rem;
+      height: 2rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity var(--transition-fast), transform var(--transition-fast), background-color var(--transition-fast);
+      z-index: 2;
+    }
+
+    .image-item:hover .delete-button {
+      opacity: 1;
+    }
+
+    .image-item .delete-button:hover {
+      background-color: var(--danger);
+      transform: scale(1.1);
+    }
+
+    .image-item .delete-button svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .image-counter {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--foreground);
+      opacity: 0.7;
+      transition: opacity var(--transition-fast);
+    }
+
+    .image-counter:hover {
+      opacity: 1;
+    }
+
+    /* Progress bar for image uploads */
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background-color: var(--background);
+      border-radius: 2px;
+      margin-top: 1rem;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar-container.active {
+      display: block;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary-gradient);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 300px;
+    }
+
+    .toast {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      background-color: var(--card);
+      color: var(--card-foreground);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--danger);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--info);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning);
+    }
+
+    .toast-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background-color: rgba(0, 0, 0, 0.1);
+      width: 100%;
+    }
+
+    .toast-progress::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: var(--primary-gradient);
+      animation: toast-progress 3s linear forwards;
+    }
+
+    @keyframes toast-progress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(10px);
+      }
+    }
+
+    /* Additional Animations */
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .rotate {
+      animation: rotate 10s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .scale-in {
+      animation: scaleIn 0.5s ease-out forwards;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .bounce {
+      animation: bounce 1s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .auth-container {
+        flex-direction: column;
+      }
+      
+      .auth-info {
+        padding: 2rem 1rem;
+      }
+      
+      .auth-form {
+        padding: 2rem 1rem;
+      }
+      
+      .auth-title {
+        font-size: 2rem;
+      }
+      
+      .auth-form-title {
+        font-size: 1.5rem;
+      }
+      
+      .dashboard-container {
+        padding: 0 1rem;
+      }
+      
+      header {
+        padding: 1rem 0;
+      }
+      
+      .logo {
+        font-size: 1.25rem;
+      }
+      
+      .logo-icon {
+        width: 2rem;
+        height: 2rem;
+      }
+      
+      .actions {
+        gap: 0.5rem;
+      }
+      
+      .button {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.875rem;
+      }
+      
+      .icon-button {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+      
+      .icon-button svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+      
+      .brain-icon {
+        width: 5rem;
+        height: 5rem;
+      }
+      
+      .app-title {
+        font-size: 2rem;
+      }
+      
+      #drop-area {
+        padding: 1.5rem;
+      }
+
+      .upload-area {
+        flex-direction: column;
+      }
+
+      .upload-actions {
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+    }
+
+    /* Accessibility improvements */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Skip to content link for keyboard users */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: var(--primary);
+      color: white;
+      padding: 8px;
+      z-index: 100;
+      transition: top 0.3s;
+    }
+
+    .skip-link:focus {
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+  
+  <div class="animated-background">
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+    <div class="bubble bubble-5"></div>
+  </div>
+
+  <div class="particles" id="particles"></div>
+
+  <div class="toast-container" id="toast-container">
+    <!-- Toasts will be added here dynamically -->
+  </div>
+
+  <!-- Signup Page -->
+  <div id="signup-page" class="page-container active">
+    <div class="auth-container">
+      <div class="auth-info">
+        <button id="signup-theme-toggle" class="icon-button theme-toggle absolute ripple-button" aria-label="Toggle dark mode">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 20V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 4.93L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.66 17.66L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        
+        <div class="auth-logo">
+          <!-- New Modern Logo -->
+          <svg class="auth-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 14C8.55228 14 9 13.5523 9 13C9 12.4477 8.55228 12 8 12C7.44772 12 7 12.4477 7 13C7 13.5523 7.44772 14 8 14Z" fill="currentColor"/>
+            <path d="M16 14C16.5523 14 17 13.5523 17 13C17 12.4477 16.5523 12 16 12C15.4477 12 15 12.4477 15 13C15 13.5523 15.4477 14 16 14Z" fill="currentColor"/>
+            <path d="M12 17C13.6569 17 15 15.6569 15 14H9C9 15.6569 10.3431 17 12 17Z" fill="currentColor"/>
+            <path d="M8.5 8C8.5 8 9.5 6 12 6C14.5 6 15.5 8 15.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>FaceRecon</span>
+        </div>
+        
+        <h1 class="auth-title">Face Reconstruction Made Easy</h1>
+        
+        <p class="auth-description">
+          FaceRecon helps you enhance and restore facial images with AI technology. Perfect for photo restoration, research, and more.
+        </p>
+        
+        <ul class="auth-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Restore old or damaged photos</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Enhance image quality</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Fast and accurate results</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Easy to use interface</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="auth-form">
+        <div class="auth-form-container">
+          <h2 class="auth-form-title">Create an Account</h2>
+          
+          <form id="signup-form">
+            <div class="form-group">
+              <label for="signup-username">Username</label>
+              <input type="text" id="signup-username" required aria-describedby="username-error">
+              <div id="username-error" class="form-error" role="alert">Username must be at least 3 characters</div>
+            </div>
+            
+            <div class="form-group">
+              <label for="signup-email">Email</label>
+              <input type="email" id="signup-email" required aria-describedby="email-error">
+              <div id="email-error" class="form-error" role="alert">Please enter a valid email address</div>
+            </div>
+            
+            <div class="form-group">
+              <label for="signup-password">Password</label>
+              <input type="password" id="signup-password" required aria-describedby="password-error password-requirements">
+              <div id="password-error" class="form-error" role="alert">Password must be at least 6 characters with letters and numbers</div>
+              <div id="password-requirements" class="password-requirements">
+                <p>Password must contain:</p>
+                <ul>
+                  <li id="length-requirement">At least 6 characters</li>
+                  <li id="letter-requirement">At least one letter</li>
+                  <li id="number-requirement">At least one number</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="signup-confirm-password">Confirm Password</label>
+              <input type="password" id="signup-confirm-password" required aria-describedby="confirm-password-error">
+              <div id="confirm-password-error" class="form-error" role="alert">Passwords do not match</div>
+            </div>
+            
+            <div class="form-group checkbox">
+              <input type="checkbox" id="signup-terms" required aria-describedby="terms-error">
+              <label for="signup-terms">I agree to the Terms and Conditions</label>
+              <div id="terms-error" class="form-error" role="alert">You must agree to the terms</div>
+            </div>
+            
+            <button type="submit" class="button primary ripple-button">Sign Up</button>
+          </form>
+          
+          <p class="form-footer">Already have an account? <a href="#" id="go-to-login">Login</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Page -->
+  <div id="login-page" class="page-container">
+    <div class="auth-container">
+      <div class="auth-info">
+        <button id="login-theme-toggle" class="icon-button theme-toggle absolute ripple-button" aria-label="Toggle dark mode">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 20V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 4.93L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.66 17.66L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        
+        <div class="auth-logo">
+          <!-- New Modern Logo -->
+          <svg class="auth-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 14C8.55228 14 9 13.5523 9 13C9 12.4477 8.55228 12 8 12C7.44772 12 7 12.4477 7 13C7 13.5523 7.44772 14 8 14Z" fill="currentColor"/>
+            <path d="M16 14C16.5523 14 17 13.5523 17 13C17 12.4477 16.5523 12 16 12C15.4477 12 15 12.4477 15 13C15 13.5523 15.4477 14 16 14Z" fill="currentColor"/>
+            <path d="M12 17C13.6569 17 15 15.6569 15 14H9C9 15.6569 10.3431 17 12 17Z" fill="currentColor"/>
+            <path d="M8.5 8C8.5 8 9.5 6 12 6C14.5 6 15.5 8 15.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>FaceRecon</span>
+        </div>
+        
+        <h1 class="auth-title">Welcome Back</h1>
+        
+        <p class="auth-description">
+          Log in to access your FaceRecon dashboard. Your projects are waiting for you.
+        </p>
+        
+        <ul class="auth-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Access your saved images</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Continue your projects</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Secure and private access</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="auth-form">
+        <div class="auth-form-container">
+          <h2 class="auth-form-title">Login to Your Account</h2>
+          
+          <form id="login-form">
+            <div class="form-group">
+              <label for="login-username">Username</label>
+              <input type="text" id="login-username" required aria-describedby="login-username-error">
+              <div id="login-username-error" class="form-error" role="alert">Please enter your username</div>
+            </div>
+            
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" required aria-describedby="login-password-error">
+              <div id="login-password-error" class="form-error" role="alert">Please enter your password</div>
+            </div>
+            
+            <div class="form-group checkbox">
+              <input type="checkbox" id="remember-me">
+              <label for="remember-me">Remember me</label>
+            </div>
+            
+            <div class="forgot-password">
+              <a href="#" id="forgot-password-link">Forgot password?</a>
+            </div>
+            
+            <button type="submit" class="button primary ripple-button">Login</button>
+          </form>
+          
+          <p class="form-footer">Don't have an account? <a href="#" id="go-to-signup">Sign up</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Page -->
+  <div id="dashboard-page" class="page-container">
+    <div class="dashboard-container">
+      <header>
+        <div class="logo">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 14C8.55228 14 9 13.5523 9 13C9 12.4477 8.55228 12 8 12C7.44772 12 7 12.4477 7 13C7 13.5523 7.44772 14 8 14Z" fill="currentColor"/>
+            <path d="M16 14C16.5523 14 17 13.5523 17 13C17 12.4477 16.5523 12 16 12C15.4477 12 15 12.4477 15 13C15 13.5523 15.4477 14 16 14Z" fill="currentColor"/>
+            <path d="M12 17C13.6569 17 15 15.6569 15 14H9C9 15.6569 10.3431 17 12 17Z" fill="currentColor"/>
+            <path d="M8.5 8C8.5 8 9.5 6 12 6C14.5 6 15.5 8 15.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>FaceRecon</span>
+        </div>
+        
+        <div class="actions">
+          <button id="dashboard-theme-toggle" class="icon-button theme-toggle ripple-button" aria-label="Toggle dark mode">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 20V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4.93 4.93L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17.66 17.66L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button id="logout-button" class="button ripple-button">Logout</button>
+        </div>
+      </header>
+
+      <main id="main-content">
+        <div class="dashboard">
+          <div class="logo-animation">
+            <div class="brain-icon floating">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate"/>
+                <path d="M8 14C8.55228 14 9 13.5523 9 13C9 12.4477 8.55228 12 8 12C7.44772 12 7 12.4477 7 13C7 13.5523 7.44772 14 8 14Z" fill="currentColor"/>
+                <path d="M16 14C16.5523 14 17 13.5523 17 13C17 12.4477 16.5523 12 16 12C15.4477 12 15 12.4477 15 13C15 13.5523 15.4477 14 16 14Z" fill="currentColor"/>
+                <path d="M12 17C13.6569 17 15 15.6569 15 14H9C9 15.6569 10.3431 17 12 17Z" fill="currentColor"/>
+                <path d="M8.5 8C8.5 8 9.5 6 12 6C14.5 6 15.5 8 15.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="bounce"/>
+              </svg>
+            </div>
+            <h1 class="app-title">FaceRecon</h1>
+            <p class="app-description">AI-Powered Facial Reconstruction</p>
+          </div>
+
+          <div class="preview-container">
+            <div class="upload-area">
+              <div id="drop-area" tabindex="0" role="button" aria-label="Drop area for image upload">
+                <p>Drag & drop image here or use the upload button</p>
+                <div class="preview-wrapper">
+                  <div id="preview">
+                    <!-- Preview image will be added here -->
+                    <button id="preview-delete-button" class="ripple-button" style="display: none;" aria-label="Delete preview image">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="progress-bar-container" id="progress-container">
+                  <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="image-counter">0/5 images uploaded</div>
+              </div>
+              <div class="upload-actions">
+                <button id="upload-button" class="icon-button ripple-button" title="Upload Image" aria-label="Upload Image">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button id="clear-all-button" class="icon-button ripple-button" title="Clear All Images" aria-label="Clear All Images">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <input type="file" id="file-input" accept="image/*" hidden aria-hidden="true">
+            </div>
+            
+            <div class="images-grid" id="images-grid" role="grid" aria-label="Uploaded images grid">
+              <!-- Images will be added here dynamically -->
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Forgot Password Page -->
+  <div id="forgot-password-page" class="page-container">
+    <div class="auth-container">
+      <div class="auth-info">
+        <button id="forgot-password-theme-toggle" class="icon-button theme-toggle absolute ripple-button" aria-label="Toggle dark mode">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 20V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M4.93 4.93L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17.66 17.66L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M20 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        
+        <div class="auth-logo">
+          <svg class="auth-logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 14C8.55228 14 9 13.5523 9 13C9 12.4477 8.55228 12 8 12C7.44772 12 7 12.4477 7 13C7 13.5523 7.44772 14 8 14Z" fill="currentColor"/>
+            <path d="M16 14C16.5523 14 17 13.5523 17 13C17 12.4477 16.5523 12 16 12C15.4477 12 15 12.4477 15 13C15 13.5523 15.4477 14 16 14Z" fill="currentColor"/>
+            <path d="M12 17C13.6569 17 15 15.6569 15 14H9C9 15.6569 10.3431 17 12 17Z" fill="currentColor"/>
+            <path d="M8.5 8C8.5 8 9.5 6 12 6C14.5 6 15.5 8 15.5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>FaceRecon</span>
+        </div>
+        
+        <h1 class="auth-title">Reset Your Password</h1>
+        
+        <p class="auth-description">
+          Forgot your password? No problem! We'll help you reset it in a few simple steps.
+        </p>
+        
+        <ul class="auth-features">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Secure password reset process</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Email verification</span>
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Quick and easy process</span>
+          </li>
+        </ul>
+      </div>
+      
+      <div class="auth-form">
+        <div class="auth-form-container">
+          <h2 class="auth-form-title">Password Reset</h2>
+          
+          <div class="reset-steps">
+            <div class="reset-step active" id="step-1">
+              <div class="reset-step-number">1</div>
+              <div class="reset-step-label">Email</div>
+            </div>
+            <div class="reset-step" id="step-2">
+              <div class="reset-step-number">2</div>
+              <div class="reset-step-label">Verify</div>
+            </div>
+            <div class="reset-step" id="step-3">
+              <div class="reset-step-number">3</div>
+              <div class="reset-step-label">Reset</div>
+            </div>
+          </div>
+          
+          <!-- Step 1: Email Form -->
+          <form id="reset-email-form" class="active">
+            <div class="form-group">
+              <label for="reset-email">Email Address</label>
+              <input type="email" id="reset-email" required aria-describedby="reset-email-error">
+              <div id="reset-email-error" class="form-error" role="alert">Please enter a valid email address</div>
+            </div>
+            
+            <button type="submit" class="button primary ripple-button">Send Reset Link</button>
+          </form>
+          
+          <!-- Step 2: Verification Code Form -->
+          <form id="verification-form" style="display: none;">
+            <p class="text-center mb-4">We've sent a verification code to your email. Please enter it below.</p>
+            
+            <div class="verification-code">
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+              <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" required>
+            </div>
+            
+            <button type="submit" class="button primary ripple-button">Verify Code</button>
+            
+            <p class="text-center mt-4">
+              <a href="#" id="resend-code">Didn't receive a code? Resend</a>
+            </p>
+          </form>
+          
+          <!-- Step 3: New Password Form -->
+          <form id="new-password-form" style="display: none;">
+            <div class="form-group">
+              <label for="new-password">New Password</label>
+              <input type="password" id="new-password" required aria-describedby="new-password-error">
+              <div id="new-password-error" class="form-error" role="alert">Password must be at least 6 characters with letters and numbers</div>
+              <div class="password-requirements">
+                <p>Password must contain:</p>
+                <ul>
+                  <li id="new-length-requirement">At least 6 characters</li>
+                  <li id="new-letter-requirement">At least one letter</li>
+                  <li id="new-number-requirement">At least one number</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="confirm-new-password">Confirm New Password</label>
+              <input type="password" id="confirm-new-password" required aria-describedby="confirm-new-password-error">
+              <div id="confirm-new-password-error" class="form-error" role="alert">Passwords do not match</div>
+            </div>
+            
+            <button type="submit" class="button primary ripple-button">Reset Password</button>
+          </form>
+          
+          <p class="form-footer">Remember your password? <a href="#" id="back-to-login">Back to Login</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const signupPage = document.getElementById('signup-page');
+    const loginPage = document.getElementById('login-page');
+    const dashboardPage = document.getElementById('dashboard-page');
+    const forgotPasswordPage = document.getElementById('forgot-password-page');
+    
+    const signupForm = document.getElementById('signup-form');
+    const loginForm = document.getElementById('login-form');
+    const resetEmailForm = document.getElementById('reset-email-form');
+    const verificationForm = document.getElementById('verification-form');
+    const newPasswordForm = document.getElementById('new-password-form');
+    
+    const goToLoginLink = document.getElementById('go-to-login');
+    const goToSignupLink = document.getElementById('go-to-signup');
+    const forgotPasswordLink = document.getElementById('forgot-password-link');
+    const backToLoginLink = document.getElementById('back-to-login');
+    const resendCodeLink = document.getElementById('resend-code');
+    const logoutButton = document.getElementById('logout-button');
+    
+    const themeToggles = document.querySelectorAll('.theme-toggle');
+    const uploadButton = document.getElementById('upload-button');
+    const clearAllButton = document.getElementById('clear-all-button');
+    const fileInput = document.getElementById('file-input');
+    const dropArea = document.getElementById('drop-area');
+    const preview = document.getElementById('preview');
+    const previewDeleteButton = document.getElementById('preview-delete-button');
+    const imagesGrid = document.getElementById('images-grid');
+    const imageCounter = document.querySelector('.image-counter');
+    const rippleButtons = document.querySelectorAll('.ripple-button');
+    const particlesContainer = document.getElementById('particles');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const toastContainer = document.getElementById('toast-container');
+    
+    // Reset password steps
+    const resetSteps = document.querySelectorAll('.reset-step');
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+    const step3 = document.getElementById('step-3');
+
+    // Password validation elements
+    const passwordInput = document.getElementById('signup-password');
+    const lengthRequirement = document.getElementById('length-requirement');
+    const letterRequirement = document.getElementById('letter-requirement');
+    const numberRequirement = document.getElementById('number-requirement');
+    
+    // New password validation elements
+    const newPasswordInput = document.getElementById('new-password');
+    const newLengthRequirement = document.getElementById('new-length-requirement');
+    const newLetterRequirement = document.getElementById('new-letter-requirement');
+    const newNumberRequirement = document.getElementById('new-number-requirement');
+
+    // Create particles
+    function createParticles() {
+      // Clear existing particles
+      particlesContainer.innerHTML = '';
+      
+      // Create new particles
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size between 3px and 10px
+        const size = Math.random() * 7 + 3;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100 + 100; // Start below the viewport
+        particle.style.left = `${posX}%`;
+        particle.style.bottom = `${-posY}px`;
+        
+        // Random animation duration between 10s and 25s
+        const duration = Math.random() * 15 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random delay
+        const delay = Math.random() * 10;
+        particle.style.animationDelay = `${delay}s`;
+        
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Toast notification system
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.setAttribute('role', 'alert');
+      
+      // Add icon based on type
+      let icon = '';
+      switch(type) {
+        case 'success':
+          icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          break;
+        case 'error':
+          icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 9L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          break;
+        case 'warning':
+          icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          break;
+        default:
+          icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+      
+      toast.innerHTML = `
+        ${icon}
+        <span>${message}</span>
+        <div class="toast-progress"></div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Remove toast after animation completes
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Page Navigation
+    function showPage(page) {
+      // Hide all pages
+      signupPage.classList.remove('active');
+      loginPage.classList.remove('active');
+      dashboardPage.classList.remove('active');
+      forgotPasswordPage.classList.remove('active');
+      
+      // Show the requested page with animation
+      page.classList.add('active');
+      
+      // Show appropriate toast message
+      if (page === loginPage && document.referrer.includes('signup')) {
+        showToast('Account created successfully! Please log in.', 'success');
+      } else if (page === dashboardPage) {
+        showToast('Login successful! Welcome back.', 'success');
+      }
+    }
+
+    goToLoginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(loginPage);
+    });
+
+    goToSignupLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(signupPage);
+    });
+
+    forgotPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(forgotPasswordPage);
+    });
+
+    backToLoginLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage(loginPage);
+    });
+
+    logoutButton.addEventListener('click', () => {
+      showToast('You have been logged out.', 'info');
+      showPage(loginPage);
+    });
+
+    // Password Reset Flow
+    resetEmailForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('reset-email').value;
+      const emailError = document.getElementById('reset-email-error');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (!emailRegex.test(email)) {
+        emailError.classList.add('active');
+        return;
+      } else {
+        emailError.classList.remove('active');
+      }
+      
+      // Hide email form, show verification form
+      resetEmailForm.style.display = 'none';
+      verificationForm.style.display = 'block';
+      
+      // Update steps
+      step1.classList.remove('active');
+      step1.classList.add('completed');
+      step2.classList.add('active');
+      
+      showToast('Verification code sent to your email.', 'success');
+    });
+
+    // Handle verification code inputs
+    const verificationInputs = verificationForm.querySelectorAll('input');
+    verificationInputs.forEach((input, index) => {
+      input.addEventListener('keyup', (e) => {
+        if (e.key >= 0 && e.key <= 9) {
+          // Move to next input
+          if (index < verificationInputs.length - 1) {
+            verificationInputs[index + 1].focus();
+          }
+        } else if (e.key === 'Backspace') {
+          // Move to previous input
+          if (index > 0) {
+            verificationInputs[index - 1].focus();
+          }
+        }
+      });
+    });
+
+    verificationForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Hide verification form, show new password form
+      verificationForm.style.display = 'none';
+      newPasswordForm.style.display = 'block';
+      
+      // Update steps
+      step2.classList.remove('active');
+      step2.classList.add('completed');
+      step3.classList.add('active');
+      
+      showToast('Code verified successfully.', 'success');
+    });
+
+    resendCodeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('New verification code sent.', 'info');
+    });
+
+    // New Password Validation
+    newPasswordInput.addEventListener('input', validateNewPassword);
+
+    function validateNewPassword() {
+      const password = newPasswordInput.value;
+      
+      // Check length
+      if (password.length >= 6) {
+        newLengthRequirement.classList.add('valid');
+        newLengthRequirement.classList.remove('invalid');
+      } else {
+        newLengthRequirement.classList.add('invalid');
+        newLengthRequirement.classList.remove('valid');
+      }
+      
+      // Check for letters
+      if (/[a-zA-Z]/.test(password)) {
+        newLetterRequirement.classList.add('valid');
+        newLetterRequirement.classList.remove('invalid');
+      } else {
+        newLetterRequirement.classList.add('invalid');
+        newLetterRequirement.classList.remove('valid');
+      }
+      
+      // Check for numbers
+      if (/[0-9]/.test(password)) {
+        newNumberRequirement.classList.add('valid');
+        newNumberRequirement.classList.remove('invalid');
+      } else {
+        newNumberRequirement.classList.add('invalid');
+        newNumberRequirement.classList.remove('valid');
+      }
+    }
+
+    newPasswordForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      let isValid = true;
+      
+      // Password validation
+      const password = document.getElementById('new-password').value;
+      const passwordError = document.getElementById('new-password-error');
+      const hasLetter = /[a-zA-Z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      
+      if (password.length < 6 || !hasLetter || !hasNumber) {
+        passwordError.classList.add('active');
+        isValid = false;
+      } else {
+        passwordError.classList.remove('active');
+      }
+      
+      // Confirm password validation
+      const confirmPassword = document.getElementById('confirm-new-password').value;
+      const confirmPasswordError = document.getElementById('confirm-new-password-error');
+      if (password !== confirmPassword) {
+        confirmPasswordError.classList.add('active');
+        isValid = false;
+      } else {
+        confirmPasswordError.classList.remove('active');
+      }
+      
+      if (isValid) {
+        showToast('Password reset successfully!', 'success');
+        setTimeout(() => {
+          showPage(loginPage);
+        }, 1500);
+      }
+    });
+
+    // Password Validation
+    passwordInput.addEventListener('input', validatePassword);
+
+    function validatePassword() {
+      const password = passwordInput.value;
+      
+      // Check length
+      if (password.length >= 6) {
+        lengthRequirement.classList.add('valid');
+        lengthRequirement.classList.remove('invalid');
+      } else {
+        lengthRequirement.classList.add('invalid');
+        lengthRequirement.classList.remove('valid');
+      }
+      
+      // Check for letters
+      if (/[a-zA-Z]/.test(password)) {
+        letterRequirement.classList.add('valid');
+        letterRequirement.classList.remove('invalid');
+      } else {
+        letterRequirement.classList.add('invalid');
+        letterRequirement.classList.remove('valid');
+      }
+      
+      // Check for numbers
+      if (/[0-9]/.test(password)) {
+        numberRequirement.classList.add('valid');
+        numberRequirement.classList.remove('invalid');
+      } else {
+        numberRequirement.classList.add('invalid');
+        numberRequirement.classList.remove('valid');
+      }
+    }
+
+    // Form Validation
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      let isValid = true;
+      
+      // Username validation
+      const username = document.getElementById('signup-username').value;
+      const usernameError = document.getElementById('username-error');
+      if (username.length < 3) {
+        usernameError.classList.add('active');
+        isValid = false;
+      } else {
+        usernameError.classList.remove('active');
+      }
+      
+      // Email validation
+      const email = document.getElementById('signup-email').value;
+      const emailError = document.getElementById('email-error');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        emailError.classList.add('active');
+        isValid = false;
+      } else {
+        emailError.classList.remove('active');
+      }
+      
+      // Password validation
+      const password = document.getElementById('signup-password').value;
+      const passwordError = document.getElementById('password-error');
+      const hasLetter = /[a-zA-Z]/.test(password);
+      const hasNumber = /[0-9]/.test(password);
+      
+      if (password.length < 6 || !hasLetter || !hasNumber) {
+        passwordError.classList.add('active');
+        isValid = false;
+      } else {
+        passwordError.classList.remove('active');
+      }
+      
+      // Confirm password validation
+      const confirmPassword = document.getElementById('signup-confirm-password').value;
+      const confirmPasswordError = document.getElementById('confirm-password-error');
+      if (password !== confirmPassword) {
+        confirmPasswordError.classList.add('active');
+        isValid = false;
+      } else {
+        confirmPasswordError.classList.remove('active');
+      }
+      
+      // Terms validation
+      const terms = document.getElementById('signup-terms').checked;
+      const termsError = document.getElementById('terms-error');
+      if (!terms) {
+        termsError.classList.add('active');
+        isValid = false;
+      } else {
+        termsError.classList.remove('active');
+      }
+      
+      // If form is valid, proceed to login page
+      if (isValid) {
+        showToast('Account created successfully!', 'success');
+        setTimeout(() => {
+          showPage(loginPage);
+        }, 1000);
+      } else {
+        showToast('Please fix the errors in the form.', 'error');
+      }
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      let isValid = true;
+      
+      // Username validation
+      const username = document.getElementById('login-username').value;
+      const usernameError = document.getElementById('login-username-error');
+      if (username.trim() === '') {
+        usernameError.classList.add('active');
+        isValid = false;
+      } else {
+        usernameError.classList.remove('active');
+      }
+      
+      // Password validation
+      const password = document.getElementById('login-password').value;
+      const passwordError = document.getElementById('login-password-error');
+      if (password.trim() === '') {
+        passwordError.classList.add('active');
+        isValid = false;
+      } else {
+        passwordError.classList.remove('active');
+      }
+      
+      // If form is valid, proceed to dashboard
+      if (isValid) {
+        showPage(dashboardPage);
+      } else {
+        showToast('Please enter your credentials.', 'warning');
+      }
+    });
+
+    // Theme Toggle
+    themeToggles.forEach(toggle => {
+      toggle.addEventListener('click', (event) => {
+        document.body.classList.toggle('dark-mode');
+        
+        // Save theme preference
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+        
+        // Add ripple effect
+        createRipple(event);
+        
+        // Show toast
+        showToast(`${isDarkMode ? 'Dark' : 'Light'} mode activated`, 'info');
+      });
+    });
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('darkMode');
+    if (savedTheme === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
+    // Image Management
+    let uploadedImages = [];
+    const MAX_IMAGES = 5;
+
+    // Preview delete button
+    previewDeleteButton.addEventListener('click', (event) => {
+      preview.innerHTML = '';
+      previewDeleteButton.style.display = 'none';
+      createRipple(event);
+      showToast('Preview image cleared.', 'info');
+    });
+
+    // File Upload
+    uploadButton.addEventListener('click', (event) => {
+      if (uploadedImages.length >= MAX_IMAGES) {
+        showToast(`You can only upload a maximum of ${MAX_IMAGES} images.`, 'warning');
+        return;
+      }
+      fileInput.click();
+      createRipple(event);
+    });
+
+    fileInput.addEventListener('change', handleFiles);
+
+    // Clear all images
+    clearAllButton.addEventListener('click', (event) => {
+      if (uploadedImages.length === 0) {
+        showToast('No images to clear.', 'info');
+        return;
+      }
+      
+      uploadedImages = [];
+      updateImagesGrid();
+      updateImageCounter();
+      preview.innerHTML = '';
+      previewDeleteButton.style.display = 'none';
+      createRipple(event);
+      showToast('All images cleared.', 'success');
+    });
+
+    // Keyboard accessibility for drop area
+    dropArea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+
+    // Drag and Drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    dropArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function highlight() {
+      dropArea.classList.add('highlight');
+    }
+
+    function unhighlight() {
+      dropArea.classList.remove('highlight');
+    }
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles(files);
+    }
+
+    function simulateProgress() {
+      progressContainer.classList.add('active');
+      let width = 0;
+      const interval = setInterval(() => {
+        if (width >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            progressContainer.classList.remove('active');
+            progressBar.style.width = '0%';
+          }, 500);
+        } else {
+          width += 5;
+          progressBar.style.width = width + '%';
+        }
+      }, 50);
+    }
+
+    function handleFiles(e) {
+      let files;
+      if (e.dataTransfer) {
+        files = e.dataTransfer.files;
+      } else if (e.target && e.target.files) {
+        files = e.target.files;
+      } else {
+        files = e;
+      }
+      
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.type.match('image.*')) {
+          if (uploadedImages.length >= MAX_IMAGES) {
+            showToast(`You can only upload a maximum of ${MAX_IMAGES} images.`, 'warning');
+            return;
+          }
+          
+          // Show progress bar
+          simulateProgress();
+          
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            const imageUrl = e.target.result;
+            
+            // Add to uploaded images array
+            uploadedImages.push(imageUrl);
+            
+            // Update the preview
+            preview.innerHTML = `<img src="${imageUrl}" alt="Preview">`;
+            previewDeleteButton.style.display = 'block';
+            
+            // Add animation to the preview
+            const img = preview.querySelector('img');
+            img.style.opacity = '0';
+            img.style.transform = 'scale(0.9)';
+            img.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            setTimeout(() => {
+              img.style.opacity = '1';
+              img.style.transform = 'scale(1)';
+            }, 10);
+            
+            // Update the images grid
+            updateImagesGrid();
+            
+            // Update image counter
+            updateImageCounter();
+            
+            // Show success toast
+            showToast('Image uploaded successfully!', 'success');
+          };
+          
+          reader.readAsDataURL(file);
+        } else {
+          showToast('Please upload an image file.', 'error');
+        }
+      }
+    }
+
+    function updateImagesGrid() {
+      imagesGrid.innerHTML = '';
+      
+      uploadedImages.forEach((imageUrl, index) => {
+        const imageItem = document.createElement('div');
+        imageItem.classList.add('image-item', 'scale-in');
+        imageItem.setAttribute('role', 'gridcell');
+        imageItem.setAttribute('aria-label', `Image ${index + 1}`);
+        
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = `Uploaded image ${index + 1}`;
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete-button', 'ripple-button');
+        deleteButton.setAttribute('aria-label', `Delete image ${index + 1}`);
+        deleteButton.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+        
+        deleteButton.addEventListener('click', (event) => {
+          uploadedImages.splice(index, 1);
+          updateImagesGrid();
+          updateImageCounter();
+          createRipple(event);
+          showToast('Image deleted.', 'info');
+        });
+        
+        imageItem.appendChild(img);
+        imageItem.appendChild(deleteButton);
+        imagesGrid.appendChild(imageItem);
+      });
+    }
+
+    function updateImageCounter() {
+      imageCounter.textContent = `${uploadedImages.length}/${MAX_IMAGES} images uploaded`;
+    }
+
+    // Ripple Effect
+    function createRipple(event) {
+      const button = event.currentTarget;
+      
+      const circle = document.createElement('span');
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const radius = diameter / 2;
+      
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+      circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+      circle.classList.add('ripple');
+      
+      // Remove existing ripples
+      const ripple = button.querySelector('.ripple');
+      if (ripple) {
+        ripple.remove();
+      }
+      
+      button.appendChild(circle);
+      
+      // Remove ripple after animation completes
+      setTimeout(() => {
+        circle.remove();
+      }, 600);
+    }
+
+    // Add ripple effect to all buttons with ripple class
+    rippleButtons.forEach(button => {
+      button.addEventListener('click', createRipple);
+    });
+
+    // Animated Background
+    function animateBackground() {
+      const bubbles = document.querySelectorAll('.bubble');
+      
+      bubbles.forEach(bubble => {
+        // Randomize initial positions slightly
+        const randomX = (Math.random() - 0.5) * 5;
+        const randomY = (Math.random() - 0.5) * 5;
+        
+        bubble.style.transform = `translate(${randomX}%, ${randomY}%)`;
+      });
+    }
+
+    // Create particles on load and window resize
+    window.addEventListener('load', createParticles);
+    window.addEventListener('resize', createParticles);
+
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', () => {
+      animateBackground();
+      createParticles();
+      updateImageCounter();
+      
+      // Show welcome toast
+      setTimeout(() => {
+        showToast('Welcome to FaceRecon!', 'info');
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
